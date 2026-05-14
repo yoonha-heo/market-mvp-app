@@ -13,7 +13,7 @@ export const createProductApi = (
   token: string,
   data: { title: string; price: number; imageUrl?: string },
 ) => {
-  return request("/products", {
+  return request<Product>("/products", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,

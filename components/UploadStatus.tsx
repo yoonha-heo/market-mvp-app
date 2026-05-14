@@ -1,10 +1,10 @@
 import { View, Text } from "react-native";
 import { Button } from "react-native-paper";
-import { useUploadStore } from "../store/uploadStore";
+import { useProductOutboxStore } from "../store/productOutboxStore";
 
 export default function UploadStatus() {
-  const queue = useUploadStore((s) => s.queue);
-  const setQueue = useUploadStore((s) => s.setQueue);
+  const queue = useProductOutboxStore((s) => s.queue);
+  const setQueue = useProductOutboxStore((s) => s.setQueue);
 
   const retry = (id: string) => {
     setQueue((prev) =>

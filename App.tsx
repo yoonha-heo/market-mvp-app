@@ -1,3 +1,4 @@
+import useProductOutboxWorker from "./hooks/useProductOutboxWorker";
 import RootNavigator from "./navigation/RootNavigator";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -6,7 +7,13 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RootNavigator />
+      <AppContent />
     </QueryClientProvider>
   );
+}
+
+function AppContent() {
+  useProductOutboxWorker();
+
+  return <RootNavigator />;
 }

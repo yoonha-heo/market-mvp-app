@@ -1,16 +1,23 @@
 import { useEffect } from "react";
 import { uploadImageApi } from "../apis/uploadImage";
-import { useUploadStore } from "../store/uploadStore";
+import { useProductOutboxStore } from "../store/productOutboxStore";
+import { useAuthStore } from "../store/authStore";
+import { createProductApi } from "../apis/product";
+import { useQueryClient } from "@tanstack/react-query";
 
 const MAX_RETRY_COUNT = 3;
 
-export default function useUploadWorker() {
-  const queue = useUploadStore((s) => s.queue);
-  const setQueue = useUploadStore((s) => s.setQueue);
+export default function useProductOutboxWorker() {
+  const token = useAuthStore((s) => s.accessToken);
+  const queryClient = useQueryClient();
+
+  const queue = useProductOutboxStore((s) => s.queue);
+  const setQueue = useProductOutboxStore((s) => s.setQueue);
 
   useEffect(() => {
+    if (!token) return;
     if (queue.length === 0) return;
-    if (queue.some((item) => item.status === "uploading")) return;
+    if (queue.some((item) => item.status === "processing")) return;
 
     const item = queue.find((q) => q.status === "pending");
     if (!item) return;
@@ -19,13 +26,23 @@ export default function useUploadWorker() {
       setQueue((prev) =>
         prev.map((q) =>
           q.id === item.id
-            ? { ...q, status: "uploading", errorMessage: undefined }
+            ? { ...q, status: "processing", errorMessage: undefined }
             : q,
         ),
       );
 
       try {
         const imageUrl = await uploadImageApi(item.image);
+
+        const product = await createProductApi(token, {
+          title: item.title,
+          price: item.price,
+          imageUrl,
+        });
+
+        await queryClient.invalidateQueries({
+          queryKey: ["products"],
+        });
 
         setQueue((prev) =>
           prev.map((q) =>
@@ -34,6 +51,7 @@ export default function useUploadWorker() {
                   ...q,
                   status: "done",
                   imageUrl,
+                  productId: product.id,
                 }
               : q,
           ),
@@ -59,5 +77,5 @@ export default function useUploadWorker() {
     };
 
     run();
-  }, [queue, setQueue]);
+  }, [queue, setQueue, token]);
 }

@@ -4,13 +4,16 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from "react-native";
 import { TextInput, Button } from "react-native-paper";
 import useDraft from "../hooks/useDraft";
 import useSell from "../hooks/useSell";
 import usePickImage from "../hooks/usePickImage";
+import { useNavigation } from "@react-navigation/native";
 
 export default function SellScreen() {
+  const navigation = useNavigation();
   const {
     hydrated,
     title,
@@ -21,7 +24,7 @@ export default function SellScreen() {
     setImage,
     clearDraft,
   } = useDraft();
-  const { submit, loading } = useSell({ title, price, image });
+  const { submit } = useSell({ title, price: Number(price), image });
   const pickImage = usePickImage(setImage);
 
   const imageUri = typeof image === "string" ? image : image?.uri;
@@ -30,11 +33,19 @@ export default function SellScreen() {
       ? "Your saved draft has been restored"
       : "";
 
-  const handleSubmit = async () => {
-    const success = await submit();
+  const handleSubmit = () => {
+    try {
+      submit();
 
-    if (success) {
+      Alert.alert(
+        "Product upload started",
+        "Your product will appear shortly.",
+      );
+
       clearDraft();
+      navigation.goBack();
+    } catch (e) {
+      Alert.alert("submit failed");
     }
   };
 
@@ -61,7 +72,6 @@ export default function SellScreen() {
 
       <TouchableOpacity
         onPress={pickImage}
-        disabled={loading}
         activeOpacity={0.85}
         style={[styles.imageBox, !imageUri && styles.imageBoxEmpty]}
       >
@@ -77,8 +87,6 @@ export default function SellScreen() {
       <Button
         mode="contained"
         onPress={handleSubmit}
-        loading={loading}
-        disabled={loading}
         style={styles.submitButton}
         contentStyle={styles.submitButtonContent}
       >

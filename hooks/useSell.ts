@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { uploadImageApi } from "../apis/uploadImage";
-import { useCreateProduct } from "./useCreateProduct";
 import { DraftImage } from "./useDraft";
+import { useProductOutboxStore } from "../store/productOutboxStore";
 
 export default function useSell({
   title,
@@ -9,31 +8,24 @@ export default function useSell({
   image,
 }: {
   title: string;
-  price: string;
-  image?: DraftImage;
+  price: number;
+  image: DraftImage;
 }) {
-  const createProductMutation = useCreateProduct();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const enqueue = useProductOutboxStore((s) => s.enqueue);
   const [submitError, setSubmitError] = useState<Error | null>(null);
 
   const submit = async () => {
-    if (isSubmitting || createProductMutation.isPending) return false;
-    if (!title || !price) return false;
+    if (!title || !Number.isFinite(price) || price <= 0 || !image) {
+      throw new Error("title and price required");
+    }
 
-    setIsSubmitting(true);
     setSubmitError(null);
 
     try {
-      let imageUrl: string | undefined;
-
-      if (image) {
-        imageUrl = await uploadImageApi(image);
-      }
-
-      await createProductMutation.mutateAsync({
+      enqueue({
         title,
-        price: Number(price),
-        imageUrl,
+        price,
+        image,
       });
 
       return true;
@@ -42,14 +34,11 @@ export default function useSell({
         error instanceof Error ? error : new Error("submit failed"),
       );
       return false;
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return {
     submit,
-    loading: isSubmitting || createProductMutation.isPending,
-    error: submitError ?? createProductMutation.error,
+    error: submitError,
   };
 }
