@@ -1,7 +1,5 @@
 import { useAuthStore } from "../store/authStore";
-
-// const BASE_URL = "https://mvp-server-aslt.onrender.com";
-const BASE_URL = "http://localhost:3000";
+import { BASE_URL } from "../constants/config";
 
 type RequestOptions = RequestInit & {
   headers?: Record<string, string>;
