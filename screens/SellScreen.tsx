@@ -24,7 +24,7 @@ export default function SellScreen() {
     setImage,
     clearDraft,
   } = useDraft();
-  const { submit } = useSell({ title, price: Number(price), image });
+  const { submit, canSubmit } = useSell({ title, price, image });
   const pickImage = usePickImage(setImage);
 
   const imageUri = typeof image === "string" ? image : image?.uri;
@@ -87,6 +87,7 @@ export default function SellScreen() {
       <Button
         mode="contained"
         onPress={handleSubmit}
+        disabled={!canSubmit}
         style={styles.submitButton}
         contentStyle={styles.submitButtonContent}
       >

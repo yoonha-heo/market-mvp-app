@@ -8,15 +8,19 @@ export default function useSell({
   image,
 }: {
   title: string;
-  price: number;
+  price: string;
   image: DraftImage;
 }) {
   const enqueue = useProductOutboxStore((s) => s.enqueue);
   const [submitError, setSubmitError] = useState<Error | null>(null);
 
+  const parsedPrice = Number(price);
+
+  const canSubmit = !!title.trim() && parsedPrice > 0 && image;
+
   const submit = async () => {
-    if (!title || !Number.isFinite(price) || price <= 0 || !image) {
-      throw new Error("title and price required");
+    if (!canSubmit) {
+      throw new Error("title, price and image required");
     }
 
     setSubmitError(null);
@@ -24,7 +28,7 @@ export default function useSell({
     try {
       enqueue({
         title,
-        price,
+        price: parsedPrice,
         image,
       });
 
@@ -39,6 +43,7 @@ export default function useSell({
 
   return {
     submit,
+    canSubmit,
     error: submitError,
   };
 }
