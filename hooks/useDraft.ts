@@ -17,12 +17,15 @@ export default function useDraft() {
   const [price, setPrice] = useState("");
   const [image, setImage] = useState<DraftImage>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [hasRestoredDraft, setHasRestoredDraft] = useState(false);
 
   const clearDraft = async () => {
-    await AsyncStorage.removeItem(KEY);
     setTitle("");
     setPrice("");
     setImage(null);
+    setHasRestoredDraft(false);
+
+    await AsyncStorage.removeItem(KEY);
   };
 
   useEffect(() => {
@@ -44,6 +47,10 @@ export default function useDraft() {
         setTitle(parsed.title || "");
         setPrice(parsed.price || "");
         setImage(parsed.image || null);
+
+        if (parsed.title || parsed.price || parsed.image) {
+          setHasRestoredDraft(true);
+        }
       }
       setHydrated(true);
     };
@@ -52,7 +59,7 @@ export default function useDraft() {
   }, []);
 
   return {
-    hydrated,
+    hasRestoredDraft,
     title,
     setTitle,
     price,

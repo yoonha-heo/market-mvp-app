@@ -15,7 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 export default function SellScreen() {
   const navigation = useNavigation();
   const {
-    hydrated,
+    hasRestoredDraft,
     title,
     setTitle,
     price,
@@ -28,10 +28,9 @@ export default function SellScreen() {
   const pickImage = usePickImage(setImage);
 
   const imageUri = typeof image === "string" ? image : image?.uri;
-  const restoredDraftMessage =
-    hydrated && (title || price || image)
-      ? "Your saved draft has been restored"
-      : "";
+  const restoredDraftMessage = hasRestoredDraft
+    ? "Your saved draft has been restored"
+    : "";
 
   const handleSubmit = () => {
     try {
