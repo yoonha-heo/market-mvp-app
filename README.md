@@ -23,6 +23,16 @@ React Query → server state and cache invalidation
 API Client  → authenticated requests and token refresh
 ```
 
+
+## Reliability details
+
+Focused on smoother mobile UX and handling unstable network situations.
+
+- Product submission is queued and retried on failure.
+- Favorite toggle uses optimistic cache updates for immediate UI feedback.
+- Draft inputs are persisted locally and restored when returning to the screen.
+
+
 ## Run
 
 ```bash
